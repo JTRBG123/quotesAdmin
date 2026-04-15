@@ -40,6 +40,26 @@ app.get('/updateAuthor', async (req, res) => {
    res.render('updateAuthor.ejs', {authorInfo})
 });
 
+app.post('/updateAuthor', async (req, res) => {
+   let firstName = req.body.firstName;
+   let lastName = req.body.lastName;
+   let dob = req.body.dob;
+   let sex = req.body.sex;
+   let authorId = req.body.authorId;
+
+   let sql = `UPDATE authors
+              SET
+              firstName = ?,
+              lastName = ?,
+              dob = ?,
+              sex = ?
+              WHERE authorId = ?
+              `;
+   let sqlParams = [firstName, lastName, dob, sex, authorId];              
+   const [rows] = await pool.query(sql, sqlParams);
+   res.redirect('/authors')
+});
+
 //route to display the form to add a new author
 app.get('/addAuthor', (req, res) => {
    res.render('addAuthor.ejs')
