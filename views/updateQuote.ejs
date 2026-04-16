@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <h1> Updating Quote </h1>
+
+    <form action="/updateQuote" method="POST">
+        <input type="hidden" name="quoteId" value="<%= quoteInfo[0].quoteId %>">
+
+        <textarea name="quote"><%= quoteInfo[0].quote %></textarea>
+
+        <select name="authorId">
+            <% for (author of authorsList) { %>
+
+                <% if (author.authorId == quoteInfo[0].authorId) { %>
+                    <option value="<%= author.authorId %>" selected><%= author.firstName %> <%= author.lastName %></option>
+                <% } else { %>
+                    <option value="<%= author.authorId %>"><%= author.firstName %> <%= author.lastName %></option>
+                <% } %>
+
+                
+
+            <% } %>
+
+        </select>
+
+        <button> Update Quote! </button>
+
+    </form>
+
+
+</body>
+</html>

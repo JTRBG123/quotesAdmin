@@ -30,6 +30,15 @@ app.get('/authors', async (req, res) => {
    res.render('authors.ejs', {authors})
 });
 
+app.get('/quotes', async (req, res) => {
+   let sql = `SELECT quote, quoteId 
+              FROM quotes
+              ORDER BY quote`;
+    const [quotes] = await pool.query(sql); 
+    console.log(quotes);              
+   res.render('quotes.ejs', {quotes})
+});
+
 //Displays the form to update an existing author
 app.get('/updateAuthor', async (req, res) => {
    let authorId = req.query.authorId;
@@ -38,6 +47,26 @@ app.get('/updateAuthor', async (req, res) => {
               WHERE authorId = ?`;
    const [authorInfo] = await pool.query(sql, [authorId]); 
    res.render('updateAuthor.ejs', {authorInfo})
+});
+
+//Displays the form we just made
+app.get('/updateQuote', async (req, res) => {
+   //Getting the id of the quote that will prepopulate the update form
+   let quoteId = req.query.quoteId;
+   //Select the data for the one specific quote we're updating
+   //so it can be plugged into the form
+   let sql = `SELECT *
+              FROM quotes
+              WHERE quoteId = ?`;
+   const [quoteInfo] = await pool.query(sql, [quoteId]); 
+   console.log(quoteInfo);
+
+   //get list of authors for the dropdown menu
+   //in the update quote form
+   let authorSql = `SELECT authorId, firstName, lastName FROM authors`;
+   const [authorsList] = await pool.query(authorSql);
+
+   res.render('updateQuote.ejs', {quoteInfo, authorsList})
 });
 
 app.post('/updateAuthor', async (req, res) => {
@@ -58,6 +87,22 @@ app.post('/updateAuthor', async (req, res) => {
    let sqlParams = [firstName, lastName, dob, sex, authorId];              
    const [rows] = await pool.query(sql, sqlParams);
    res.redirect('/authors')
+});
+
+app.post('/updateQuote', async (req, res) => {
+   let quoteId = req.body.quoteId;
+   let authorId = req.body.authorId;
+   let quote = req.body.quote;
+
+   let sql = `UPDATE quotes
+              SET
+              quote = ?,
+              authorId = ?
+              WHERE quoteId = ?
+              `;
+   let sqlParams = [quote, authorId, quoteId];              
+   const [rows] = await pool.query(sql, sqlParams);
+   res.redirect('/quotes')
 });
 
 //route to display the form to add a new author
