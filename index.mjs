@@ -9,16 +9,55 @@ app.use(express.urlencoded({extended:true}));
 
 //setting up database connection pool, replace values in red
 const pool = mysql.createPool({
-    host: "sh4ob67ph9l80v61.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
-    user: "w9c7lwn8um1o99yj",
-    password: "u3rw8lbcasz2h307",
-    database: "pyn5h5u7iu857dd2",
+    host: "mkorvuw3sl6cu9ms.cbetxkdyhwsb.us-east-1.rds.amazonaws.com",
+    user: "wb17uxuv7sk7sb5q",
+    password: "sz7xg1pq8ke9wvyt",
+    database: "x3fxumwvttluosqc",
     connectionLimit: 10,
     waitForConnections: true
 });
 //routes
 app.get('/', (req, res) => {
    res.render('home.ejs')
+});
+
+app.get('/authors', async (req, res) => {
+   let sql = `SELECT authorId, firstName, lastName
+              FROM authors
+              ORDER BY lastName`;
+    const [authors] = await pool.query(sql); 
+    console.log(authors);              
+   res.render('authors.ejs', {authors})
+});
+
+//Displays the form to update an existing author
+app.get('/updateAuthor', async (req, res) => {
+   let authorId = req.query.authorId;
+   let sql = `SELECT *, DATE_FORMAT(dob, '%Y-%m-%d') ISOdob, DATE_FORMAT(dod, '%Y-%m-%d') ISOdod
+              FROM authors
+              WHERE authorId = ?`;
+   const [authorInfo] = await pool.query(sql, [authorId]); 
+   res.render('updateAuthor.ejs', {authorInfo})
+});
+
+app.post('/updateAuthor', async (req, res) => {
+   let firstName = req.body.firstName;
+   let lastName = req.body.lastName;
+   let dob = req.body.dob;
+   let sex = req.body.sex;
+   let authorId = req.body.authorId;
+
+   let sql = `UPDATE authors
+              SET
+              firstName = ?,
+              lastName = ?,
+              dob = ?,
+              sex = ?
+              WHERE authorId = ?
+              `;
+   let sqlParams = [firstName, lastName, dob, sex, authorId];              
+   const [rows] = await pool.query(sql, sqlParams);
+   res.redirect('/authors')
 });
 
 //route to display the form to add a new author
